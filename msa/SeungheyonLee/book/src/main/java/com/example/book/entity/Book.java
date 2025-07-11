@@ -21,10 +21,20 @@ public class Book {
     private String author;
     private String isbn;
 
+    private Long accountId;
+
     public Book(String title, String content, String author, String isbn) {
         this.title = title;
         this.content = content;
         this.author = author;
         this.isbn = isbn;
+    }
+
+    public Book(String title, String content, String author, String isbn, Long accountId) {
+        this.title = title;
+        this.content = content;
+        this.author = author;
+        this.isbn = isbn;
+        this.accountId = accountId;
     }
 }
