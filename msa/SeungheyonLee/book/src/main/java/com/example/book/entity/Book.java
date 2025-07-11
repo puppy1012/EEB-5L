@@ -22,6 +22,7 @@ public class Book {
     private String isbn;
 
     private Long accountId;
+    private Long bookId;
 
     public Book(String title, String content, String author, String isbn) {
         this.title = title;
@@ -35,6 +36,12 @@ public class Book {
         this.content = content;
         this.author = author;
         this.isbn = isbn;
+        this.accountId = accountId;
+    }
+    public Book(Long bookId,String title,String content,Long accountId){
+        this.bookId = bookId;
+        this.title = title;
+        this.content = content;
         this.accountId = accountId;
     }
 }

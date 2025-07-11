@@ -3,7 +3,7 @@ package com.example.book.controller.response;
 import com.example.book.entity.Book;
 import lombok.Getter;
 
-@Getter
+
 public class RegisterBookResponse {
     private Long id;
     private String title;
@@ -30,5 +30,25 @@ public class RegisterBookResponse {
                 book.getAuthor(),
                 book.getIsbn()
         );
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getIsbn() {
+        return isbn;
     }
 }

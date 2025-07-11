@@ -2,10 +2,8 @@ package com.example.book.controller;
 
 import com.example.book.controller.request.RegisterBookRequest;
 import com.example.book.controller.request.RegisterBookWithAuthorizationRequest;
-import com.example.book.controller.response.BookResponse;
-import com.example.book.controller.response.IdAccountResponse;
-import com.example.book.controller.response.RegisterBookResponse;
-import com.example.book.controller.response.RegisterBookWithAuthorizationResponse;
+import com.example.book.controller.request.UpdateBookRequest;
+import com.example.book.controller.response.*;
 import com.example.book.entity.Book;
 import com.example.book.repository.BookRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +86,27 @@ public class BookController {
         // 8. 저장된 Book 객체를 기반으로 응답 객체 생성 후 반환
         return RegisterBookWithAuthorizationResponse.from(registeredBook);
     }
+    @PostMapping("/update")
+    public UpdateBookResponse register(
+            @RequestHeader("Authorization")String token,
+            @RequestBody UpdateBookRequest request){
+        log.info("register() -> request = {}", request);
+        String pureToken = extractToken(token);
+        IdAccountResponse response = accountClient.getAccountId("Bearer " + pureToken);
+        Long accountId = response.getAccountId();
 
+        Long requestBookId=request.getBookId();
+        Book foundBook=bookRepository.findById(requestBookId)
+                .orElseThrow( ()-> new RuntimeException("이런 책은 존재하지 않습니다: " + requestBookId));
+        if(!foundBook.getAccountId().equals(accountId)){
+            throw new RuntimeException("책을 등록한 사람이 아닙니다");
+        }
+        foundBook.setTitle(request.getTitle());
+        foundBook.setContent(request.getContent());
+
+        Book updatedBook = bookRepository.save(foundBook);
+        return UpdateBookResponse.from(updatedBook);
+    }
     // Authorization 헤더에서 Bearer 접두어를 제거하고 토큰만 반환하는 헬퍼 메서드
     private String extractToken(String token) {
         // 예: "Bearer abc.def.ghi" → "abc.def.ghi"
