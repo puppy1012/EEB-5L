@@ -82,8 +82,8 @@ export const vueGameChipAppMount = (el: string | Element, eventBus: any) => {
         });
 
         const pinia = createPinia();
-        // app.use(vuetify).use(router).use(pinia);
-        app.use(vuetify);
+        app.use(vuetify).use(router).use(pinia);
+        // app.use(vuetify);
         app.provide('eventBus', eventBus);
 
         eventBus.on('game-chip-routing-event', (path: string) => {
