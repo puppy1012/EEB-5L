@@ -33,14 +33,16 @@
 
     <v-row v-else>
       <v-col
-          v-for="chip in gameChipStore.gameChipList"
+          v-for="chip in pagedGameChipList"
           :key="chip.id"
-          cols="12"
-          sm="6"
-          md="4"
+          cols="3"
       >
         <v-card @click="goToDetail(chip.id)" class="hoverable" elevation="3">
-          <v-img :src="chip.imageUrl" height="200px" cover />
+          <v-img
+              :src="`data:image/png;base64,${chip.thumbnailImageData}`"
+              height="125px"
+              cover
+          />
           <v-card-title>{{ chip.title }}</v-card-title>
           <v-card-subtitle>₩ {{ chip.price.toLocaleString() }}</v-card-subtitle>
           <v-card-text>{{ chip.description }}</v-card-text>
@@ -68,7 +70,7 @@ const gameChipStore = useGameChipStore()
 const router = useRouter()
 
 const page = ref(1)
-const perPage = 6
+const perPage = 8  // 2행 x 4열 = 8개씩 보여줌
 const totalPages = ref(1)
 const loading = ref(false)
 
@@ -91,6 +93,12 @@ const fetchGameChips = async () => {
     loading.value = false
   }
 }
+
+// 현재 페이지 아이템만 보여주는 computed
+const pagedGameChipList = computed(() => {
+  const start = 0 // 실제 데이터는 이미 서버에서 perPage 단위로 가져오니 0부터 끝까지 모두 보여줌
+  return gameChipStore.gameChipList.slice(start, perPage)
+})
 
 const goToDetail = (id: number) => {
   router.push({
