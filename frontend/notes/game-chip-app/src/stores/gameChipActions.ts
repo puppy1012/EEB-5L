@@ -24,16 +24,29 @@ export const gameChipActions = {
     //     }
     // },
 
-    async requestCreateGameChipToSpring(payload: {
-        title: string
-        content: string
-    }): Promise<any> {  // 반환 타입은 보통 서버 응답에 따라 적절히 수정하세요
+    async requestCreateGameChipToSpring(payload: FormData): Promise<any> {
         try {
-            const res = await axiosInstance.springAxiosInst.post('/game-chip/register', payload)
+            const token = localStorage.getItem('userToken') || ''
+            if (!token) {
+                alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.')
+                return
+                // router.push('/authentication')
+            }
+
+            console.log('FormData entries:')
+            for (const pair of payload.entries()) {
+                console.log(pair[0], pair[1])
+            }
+
+            const res = await axiosInstance.springAxiosInst.post('/game-chip/register', payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,  // 헤더에 토큰 포함
+                },
+            })
             alert('등록 성공!')
-            return res.data  // 보통 등록 후 생성된 게시물 정보를 반환하면 편리합니다.
+            return res.data
         } catch (error) {
-            alert('requestCreateBoardToSpring() 문제 발생')
+            alert('requestCreateGameChipToSpring() 문제 발생')
             throw error
         }
     },

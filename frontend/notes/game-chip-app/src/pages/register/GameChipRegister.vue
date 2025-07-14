@@ -24,7 +24,7 @@
       </v-col>
     </v-row>
 
-    <!-- 기존 썸네일 이미지 보여주기 -->
+    <!-- 썸네일 미리보기 -->
     <v-row v-if="thumbnailUrl" class="mb-2">
       <v-col cols="12">
         <h4>현재 썸네일</h4>
@@ -37,12 +37,11 @@
     <v-row>
       <v-col cols="12">
         <v-file-input
+            v-model="thumbnailInputValue"
             label="썸네일 이미지 업로드 (1개)"
             prepend-icon="mdi-camera"
             show-size
             accept="image/*"
-            :value="thumbnailFile ? [thumbnailFile] : []"
-            @change="onThumbnailChange"
             clearable
         />
       </v-col>
@@ -52,13 +51,12 @@
     <v-row>
       <v-col cols="12">
         <v-file-input
+            v-model="addImageInputValue"
             label="추가 이미지 업로드 (여러 개 가능)"
             multiple
             prepend-icon="mdi-camera"
             show-size
             accept="image/*"
-            v-model="addImageInputValue"
-            @change="onAddImageFiles"
             hint="추가 선택 시 기존 파일에 추가됩니다."
             persistent-hint
             clearable
@@ -66,8 +64,8 @@
       </v-col>
     </v-row>
 
-    <!-- 추가 이미지 리스트 -->
-    <v-row v-if="imageFiles.length > 0" class="mb-4">
+    <!-- 추가 이미지 목록 -->
+    <v-row v-if="imageFiles.length > 0" class="mb-2">
       <v-col cols="12">
         <h4>선택한 추가 이미지 목록</h4>
         <v-chip-group column>
@@ -84,6 +82,23 @@
       </v-col>
     </v-row>
 
+    <!-- 추가 이미지 미리보기 -->
+    <v-row v-if="imagePreviews.length > 0" class="mb-4">
+      <v-col cols="12">
+        <h4>추가 이미지 미리보기</h4>
+        <v-row>
+          <v-col
+              v-for="(src, idx) in imagePreviews"
+              :key="src + '-' + idx"
+              cols="3"
+          >
+            <v-img :src="src" aspect-ratio="1" contain />
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
+
+    <!-- 버튼 -->
     <v-row>
       <v-col cols="12" class="text-right">
         <v-btn
@@ -111,23 +126,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGameChipStore } from '../../stores/gameChipStore'
 
+// 상태
 const title = ref('')
 const description = ref('')
 const price = ref(0)
 
-// 썸네일 관련
+const thumbnailInputValue = ref<File[] | null>(null)
 const thumbnailFile = ref<File | null>(null)
 const thumbnailUrl = ref('')
 
-// 추가 이미지들 누적 배열
-const imageFiles = ref<File[]>([])
-
-// 추가 이미지 input v-model 값 (초기화용)
 const addImageInputValue = ref<File[] | null>(null)
+const imageFiles = ref<File[]>([])
+const imagePreviews = ref<string[]>([])
 
 const hoverPrimary = ref(false)
 const hoverError = ref(false)
@@ -135,100 +149,155 @@ const hoverError = ref(false)
 const router = useRouter()
 const gameChipStore = useGameChipStore()
 
+// 버튼 스타일
 const primaryBtnStyle = computed(() => ({
   backgroundColor: hoverPrimary.value ? '#1565c0' : '#1976d2',
   color: 'white',
   transition: 'background-color 0.3s ease',
 }))
-
 const errorBtnStyle = computed(() => ({
   backgroundColor: hoverError.value ? '#b71c1c' : '#d32f2f',
   color: 'white',
   transition: 'background-color 0.3s ease',
 }))
 
-// 썸네일 변경 이벤트 (Event 객체에서 파일 추출)
-function onThumbnailChange(event: Event) {
-  const target = event.target as HTMLInputElement
-  const files = target.files
-  if (!files || files.length === 0) {
+// 썸네일 감시
+watch(thumbnailInputValue, (newFiles) => {
+  console.log('🟡 [watch] thumbnailInputValue changed:', newFiles)
+
+  if (!newFiles) {
     thumbnailFile.value = null
     thumbnailUrl.value = ''
+    console.warn('⚠️ [watch] 썸네일 없음')
     return
   }
-  const file = files[0]
-  thumbnailFile.value = file
-  thumbnailUrl.value = URL.createObjectURL(file)
-}
 
+  if (newFiles instanceof File) {
+    // 단일 파일
+    thumbnailFile.value = newFiles
+    try {
+      const url = URL.createObjectURL(newFiles)
+      thumbnailUrl.value = url
+      console.log('🟢 [watch] 썸네일 파일 등록됨 (단일):', thumbnailFile.value)
+      console.log('🟢 [watch] 썸네일 URL 생성됨:', url)
+    } catch (e) {
+      console.error('🔴 [watch] createObjectURL 실패:', e)
+    }
+  } else if (Array.isArray(newFiles) && newFiles.length > 0) {
+    // 배열 파일
+    const file = newFiles[0]
+    thumbnailFile.value = file
+    try {
+      const url = URL.createObjectURL(file)
+      thumbnailUrl.value = url
+      console.log('🟢 [watch] 썸네일 파일 등록됨 (배열):', thumbnailFile.value)
+      console.log('🟢 [watch] 썸네일 URL 생성됨:', url)
+    } catch (e) {
+      console.error('🔴 [watch] createObjectURL 실패:', e)
+    }
+  } else {
+    // 빈 배열 or 기타
+    thumbnailFile.value = null
+    thumbnailUrl.value = ''
+    console.warn('⚠️ [watch] 썸네일 없음 (빈 배열)')
+  }
+})
+
+// 썸네일 삭제
 function removeThumbnail() {
   thumbnailFile.value = null
   thumbnailUrl.value = ''
+  thumbnailInputValue.value = null
+  console.log('🧹 썸네일 제거됨')
 }
 
-// 추가 이미지 여러 개 누적 추가 처리 (Event 객체에서 파일 배열 추출)
-function onAddImageFiles(event: Event) {
-  const target = event.target as HTMLInputElement
-  const files = target.files
-  if (!files) return
+// 추가 이미지 감시
+watch(addImageInputValue, (newFiles) => {
+  console.log('🟡 [watch] addImageInputValue changed:', newFiles)
 
-  const filesArray = Array.from(files)
+  if (newFiles && newFiles.length > 0) {
+    const filesArray = Array.from(newFiles)
+    console.log('🟡 [watch] newFiles to Array:', filesArray)
 
-  // 중복 파일명 제거
-  const filteredNewFiles = filesArray.filter(
-      (f) => !imageFiles.value.some((existing) => existing.name === f.name)
-  )
+    const filteredNewFiles = filesArray.filter(
+        (f) => !imageFiles.value.some((existing) => existing.name === f.name)
+    )
+    console.log('🟡 [watch] filtered new files:', filteredNewFiles)
 
-  imageFiles.value = [...imageFiles.value, ...filteredNewFiles]
-
-  // input 값을 초기화해서 다음 선택시 change 이벤트가 잘 발생하게 한다
+    imageFiles.value = [...imageFiles.value, ...filteredNewFiles]
+    console.log('🟢 추가 이미지 목록:', imageFiles.value)
+  }
   addImageInputValue.value = null
-}
+})
 
+// 추가 이미지 미리보기 URL 업데이트
+watch(
+    imageFiles,
+    (files) => {
+      imagePreviews.value.forEach((url) => URL.revokeObjectURL(url)) // 이전 URL 해제
+      imagePreviews.value = files.map((file) => URL.createObjectURL(file))
+      console.log('🟢 이미지 미리보기 URL 생성됨:', imagePreviews.value)
+    },
+    { immediate: true }
+)
+
+// 이미지 제거
 function removeImage(index: number) {
+  console.log('🗑️ 이미지 제거됨:', imageFiles.value[index])
   imageFiles.value.splice(index, 1)
 }
 
+// 등록 버튼
 const onSubmit = async () => {
-  const priceNum = Number(price.value)
+  console.log('📨 [submit] title:', title.value)
+  console.log('📨 [submit] description:', description.value)
+  console.log('📨 [submit] price:', price.value)
+  console.log('📨 [submit] thumbnailFile:', thumbnailFile.value)
+  console.log('📨 [submit] imageFiles:', imageFiles.value)
 
-  if (
-      !title.value.trim() ||
-      !description.value.trim() ||
-      isNaN(priceNum) ||
-      priceNum <= 0 ||
-      (!thumbnailFile.value && !thumbnailUrl.value)
-  ) {
-    alert('제목, 설명, 가격(0 초과), 썸네일은 필수입니다.')
+  if (!title.value.trim()) {
+    alert('제목을 입력하세요.')
+    return
+  }
+  if (!description.value.trim()) {
+    alert('설명을 입력하세요.')
+    return
+  }
+  if (typeof price.value !== 'number' || isNaN(price.value) || price.value <= 0) {
+    alert('가격은 0보다 큰 숫자로 입력하세요.')
+    return
+  }
+  if (!thumbnailFile.value) {
+    alert('썸네일을 선택하세요.')
+    console.warn('❌ 썸네일 없음')
     return
   }
 
   const formData = new FormData()
   formData.append('title', title.value)
   formData.append('description', description.value)
-  formData.append('price', priceNum.toString())
-
-  if (thumbnailFile.value) {
-    formData.append('thumbnailFile', thumbnailFile.value)
-  } else if (thumbnailUrl.value) {
-    formData.append('thumbnailUrl', thumbnailUrl.value)
-  }
+  formData.append('price', price.value.toString())
+  formData.append('thumbnailFile', thumbnailFile.value)
 
   imageFiles.value.forEach((file) => {
     formData.append('imageFileList', file)
   })
 
+  console.log('📦 [submit] FormData 최종 준비 완료')
+
   try {
     await gameChipStore.requestCreateGameChipToSpring(formData)
     alert('등록 완료!')
-    router.push({ name: 'VueGameChipList' })
+    router.push({ name: 'GameChipList' })
   } catch (error) {
     alert('등록 실패!')
-    console.error(error)
+    console.error('❌ 등록 실패:', error)
   }
 }
 
+// 취소 버튼
 const onCancel = () => {
+  console.log('🚪 [취소] 페이지 뒤로가기')
   router.go(-1)
 }
 </script>

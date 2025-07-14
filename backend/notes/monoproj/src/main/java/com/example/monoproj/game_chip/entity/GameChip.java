@@ -26,8 +26,6 @@ public class GameChip {
 
     private int price;
 
-    private String imageUrl; // AWS S3에 업로드된 이미지 경로
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
@@ -39,11 +37,10 @@ public class GameChip {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public GameChip(String title, String description, int price, String imageUrl, Account account) {
+    public GameChip(String title, String description, int price, Account account) {
         this.title = title;
         this.description = description;
         this.price = price;
-        this.imageUrl = imageUrl;
         this.account = account;
     }
 }

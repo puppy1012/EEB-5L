@@ -13,22 +13,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ListGameChipResponseForm {
     private final List<Map<String, Object>> gameChipList;
-    private final int totalItems;
+    private final int currentPage;
     private final int totalPages;
+    private final long totalItems;
 
     public static ListGameChipResponseForm from(ListGameChipResponse response) {
-        List<Map<String, Object>> list = response.getGameChipList().stream()
-                .map(gameChip -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("id", gameChip.getId());
-                    map.put("title", gameChip.getTitle());
-                    map.put("description", gameChip.getDescription());
-                    map.put("price", gameChip.getPrice());
-                    map.put("imageUrl", gameChip.getImageUrl());
-                    return map;
-                })
-                .collect(Collectors.toList());
-
-        return new ListGameChipResponseForm(list, (int) response.getTotalItems(), response.getTotalPages());
+        return new ListGameChipResponseForm(
+                response.toMapList(),
+                response.getCurrentPage(),
+                response.getTotalPages(),
+                response.getTotalItems()
+        );
     }
 }
