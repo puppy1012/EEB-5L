@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import { defineConfig } from "@rspack/cli";
-import { rspack } from "@rspack/core";
+import {DefinePlugin, rspack} from "@rspack/core";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { VueLoaderPlugin } from "vue-loader";
 
@@ -14,7 +14,7 @@ const targets = ["chrome >= 87", "edge >= 88", "firefox >= 78", "safari >= 14"];
 export default defineConfig({
   context: __dirname,
   entry: {
-    main: "./src/index.ts",
+    main: "./src/index.tsx",
   },
   resolve: {
     extensions: ["...", ".ts", ".tsx", ".jsx"],
@@ -24,6 +24,33 @@ export default defineConfig({
     port: 4321,
     historyApiFallback: true,
     watchFiles: [path.resolve(__dirname, "src")],
+    setupMiddlewares: (middlewares, devServer) => {
+      const envOrigins = process.env.MFE_CORS_ORIGIN ?? "";
+      const allowedOrigins = envOrigins
+          .split(",")
+          .map(o => o.trim())
+          .filter(Boolean);
+
+      if (devServer?.app) {
+        devServer.app.use((req, res, next) => {
+          const origin = req.headers.origin;
+          if (origin && allowedOrigins.includes(origin)) {
+            res.setHeader("Access-Control-Allow-Origin", origin);
+          }
+
+          res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,POST,PUT,DELETE");
+          res.setHeader("Access-Control-Allow-Headers", "*");
+
+          if (req.method === "OPTIONS") {
+            res.sendStatus(200);
+          } else {
+            next();
+          }
+        });
+      }
+
+      return middlewares;
+    },
   },
 
   output: {
@@ -78,6 +105,11 @@ export default defineConfig({
     new VueLoaderPlugin(),
     new rspack.HtmlRspackPlugin({
       template: "./index.html",
+    }),
+    new DefinePlugin({
+      "process.env.VUE_APP_BASE_URL": JSON.stringify(process.env.VUE_APP_BASE_URL),
+      // "process.env.MFE_CORS_ORIGIN": JSON.stringify(process.env.MFE_CORS_ORIGIN),
+      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
     }),
     new ModuleFederationPlugin(mfConfig),
   ].filter(Boolean),
