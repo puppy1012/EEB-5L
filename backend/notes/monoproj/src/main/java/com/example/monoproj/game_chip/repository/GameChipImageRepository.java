@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface GameChipImageRepository extends JpaRepository<GameChipImage, Long> {
     List<GameChipImage> findAllByGameChipInAndType(List<GameChip> gameChips, GameChipImageType type);
+    List<GameChipImage> findAllByGameChipId(Long gameChipId);
 }

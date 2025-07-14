@@ -14,7 +14,7 @@ public class GameChipImage {
     private Long id;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGBLOB")
     private byte[] imageData;
 
     @Column(nullable = false)

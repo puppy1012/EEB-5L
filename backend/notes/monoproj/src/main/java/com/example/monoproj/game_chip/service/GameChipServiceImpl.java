@@ -12,6 +12,7 @@ import com.example.monoproj.game_chip.service.request.ListGameChipRequest;
 import com.example.monoproj.game_chip.service.request.RegisterGameChipImageRequest;
 import com.example.monoproj.game_chip.service.request.RegisterGameChipRequest;
 import com.example.monoproj.game_chip.service.response.ListGameChipResponse;
+import com.example.monoproj.game_chip.service.response.ReadGameChipResponse;
 import com.example.monoproj.game_chip.service.response.RegisterGameChipResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -78,5 +79,15 @@ public class GameChipServiceImpl implements GameChipService {
                 pageResult.getTotalElements(),
                 thumbnailMap
         );
+    }
+
+    @Override
+    public ReadGameChipResponse readGameChip(Long gameChipId) {
+        GameChip gameChip = gameChipRepository.findById(gameChipId)
+                .orElseThrow(() -> new RuntimeException("GameChip 존재하지 않음 id: " + gameChipId));
+
+        List<GameChipImage> images = gameChipImageRepository.findAllByGameChipId(gameChipId);
+
+        return ReadGameChipResponse.from(gameChip, images);
     }
 }
