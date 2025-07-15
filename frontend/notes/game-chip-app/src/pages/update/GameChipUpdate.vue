@@ -36,8 +36,18 @@
               v-for="(url, idx) in existingDetailImageUrls"
               :key="'existing-' + idx"
               cols="3"
+              class="position-relative"
           >
             <v-img :src="url" aspect-ratio="1" contain />
+            <v-btn
+                icon
+                size="x-small"
+                class="position-absolute top-0 right-0"
+                style="z-index: 2; background-color: red; color: white;"
+                @click="removeExistingImage(idx)"
+            >
+              ✕
+            </v-btn>
           </v-col>
         </v-row>
       </v-col>
@@ -113,6 +123,7 @@ const thumbnailInputValue = ref<File[] | null>(null)
 const thumbnailFile = ref<File | null>(null)
 
 const existingDetailImageUrls = ref<string[]>([])
+const removedDetailImageIndexes = ref<number[]>([])
 
 const addImageInputValue = ref<File[] | null>(null)
 const imageFiles = ref<File[]>([])
@@ -166,6 +177,12 @@ onMounted(async () => {
   }
 })
 
+// 기존 상세 이미지 제거
+function removeExistingImage(index: number) {
+  removedDetailImageIndexes.value.push(index)
+  existingDetailImageUrls.value.splice(index, 1)
+}
+
 // 썸네일 업로드 감시
 watch(thumbnailInputValue, (newFiles) => {
   if (Array.isArray(newFiles) && newFiles.length > 0) {
@@ -204,6 +221,7 @@ async function onSubmit() {
       price: price.value,
       thumbnailFile: thumbnailFile.value,
       imageFileList: imageFiles.value,
+      removeDetailImageIndexes: removedDetailImageIndexes.value
     })
 
     router.push({ name: 'GameChipRead', params: { id: gameChipId } })
