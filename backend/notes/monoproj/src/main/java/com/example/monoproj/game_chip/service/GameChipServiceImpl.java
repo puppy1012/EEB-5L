@@ -56,6 +56,7 @@ public class GameChipServiceImpl implements GameChipService {
         return RegisterGameChipResponse.from(savedGameChip, allImages);
     }
 
+    @Override
     public ListGameChipResponse getAllGameChips(ListGameChipRequest request) {
         int page = request.getPage() - 1;
         int perPage = request.getPerPage();
@@ -90,4 +91,17 @@ public class GameChipServiceImpl implements GameChipService {
 
         return ReadGameChipResponse.from(gameChip, images);
     }
+
+    @Override
+    public void deleteGameChip(Long gameChipId, Long accountId) {
+        GameChip chip = gameChipRepository.findById(gameChipId)
+                .orElseThrow(() -> new RuntimeException("GameChip not found"));
+
+        if (!chip.getAccount().getId().equals(accountId)) {
+            throw new RuntimeException("삭제 권한이 없습니다.");
+        }
+
+        gameChipRepository.delete(chip);
+    }
+
 }

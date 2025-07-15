@@ -13,4 +13,5 @@ public interface GameChipService {
     RegisterGameChipResponse createGameChip(RegisterGameChipRequest gameChipRequest, RegisterGameChipImageRequest gameChipImageRequest) throws IOException;
     ListGameChipResponse getAllGameChips(ListGameChipRequest request);
     ReadGameChipResponse readGameChip(Long gameChipId);
+    void deleteGameChip(Long gameChipId, Long accountId);
 }

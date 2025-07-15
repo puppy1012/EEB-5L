@@ -303,6 +303,6 @@ const onSubmit = async () => {
 // 취소 버튼
 const onCancel = () => {
   console.log('🚪 [취소] 페이지 뒤로가기')
-  router.go(-1)
+  setTimeout(() => router.go(-1), 0)
 }
 </script>

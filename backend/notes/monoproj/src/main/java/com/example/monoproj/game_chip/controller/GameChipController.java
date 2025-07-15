@@ -70,6 +70,19 @@ public class GameChipController {
         return ReadGameChipResponseForm.from(response);
     }
 
+    @DeleteMapping("/delete/{id}")
+    public void delete(@RequestHeader("Authorization") String authorization,
+                       @PathVariable("id") Long gameChipId) {
+
+        String token = extractToken(authorization);
+        Long accountId = redisCacheService.getValueByKey(token, Long.class);
+        if (accountId == null) {
+            throw new RuntimeException("Invalid or expired token");
+        }
+
+        gameChipService.deleteGameChip(gameChipId, accountId);
+    }
+
     private String extractToken(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);
