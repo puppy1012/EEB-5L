@@ -11,7 +11,6 @@ springAxiosInst.interceptors.request.use((config) => {
     const userToken = localStorage.getItem('userToken')
     const requestUrl = config.url || ''
 
-    // /board/list, /board/read/:boardId
     const isPublicRequest =
         requestUrl === '/game-chip/list' ||
         /^\/game-chip\/read\/\d+$/.test(requestUrl)

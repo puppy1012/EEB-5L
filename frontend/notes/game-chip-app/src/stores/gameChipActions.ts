@@ -65,18 +65,50 @@ export const gameChipActions = {
         }
     },
 
-    // async requestUpdateGameChipToSpring(payload: {
-    //     boardId: number
-    //     title: string
-    //     content: string
-    //     writer: string
-    // }): Promise<void> {
-    //     try {
-    //         await axiosInstance.springAxiosInst.put(`/game-chip/update/${payload.boardId}`, payload)
-    //         alert('수정 성공!')
-    //     } catch (error) {
-    //         alert('requestUpdateBoardToSpring() 문제 발생')
-    //         throw error
-    //     }
-    // },
+    async requestUpdateGameChipToSpring(payload: {
+        id: number
+        title: string
+        description: string
+        price: number
+        thumbnailFile: File | null
+        imageFileList: File[]
+    }): Promise<void> {
+        try {
+            const token = localStorage.getItem('userToken') || ''
+            if (!token) {
+                alert('로그인이 필요합니다.')
+                return
+            }
+
+            const formData = new FormData()
+            formData.append('title', payload.title)
+            formData.append('description', payload.description)
+            formData.append('price', payload.price.toString())
+
+            if (payload.thumbnailFile) {
+                formData.append('thumbnailFile', payload.thumbnailFile)
+            }
+
+            for (const file of payload.imageFileList) {
+                formData.append('imageFileList', file)
+            }
+
+            await axiosInstance.springAxiosInst.put(
+                `/game-chip/update/${payload.id}`,
+                formData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            )
+
+            alert('수정 성공!')
+        } catch (error) {
+            alert('수정 중 오류 발생')
+            console.error('requestUpdateGameChipToSpring() 문제 발생', error)
+            throw error
+        }
+    }
 }

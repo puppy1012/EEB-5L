@@ -165,7 +165,7 @@ onMounted(async () => {
 // 수정 버튼 클릭 시
 function onEdit() {
   if (!gameChipId.value) return
-  router.push({ name: 'GameChipEdit', params: { id: gameChipId.value } })
+  router.push({ name: 'GameChipUpdate', params: { id: gameChipId.value } })
 }
 
 // 삭제 버튼 클릭 시
