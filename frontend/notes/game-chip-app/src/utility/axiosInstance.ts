@@ -13,9 +13,10 @@ springAxiosInst.interceptors.request.use((config) => {
 
     // /board/list, /board/read/:boardId
     const isPublicRequest =
-        requestUrl === '/board/list' ||
-        /^\/board\/read\/\d+$/.test(requestUrl)
+        requestUrl === '/game-chip/list' ||
+        /^\/game-chip\/read\/\d+$/.test(requestUrl)
 
+    // 공개 요청이면 토큰 안 붙임
     if (isPublicRequest) {
         return config
     }

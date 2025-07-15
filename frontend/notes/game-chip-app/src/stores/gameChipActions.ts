@@ -54,6 +54,8 @@ export const gameChipActions = {
     },
 
     async requestDeleteGameChipToSpring(id: number): Promise<void> {
+        console.log('delete game-chip id:', id)
+
         try {
             await axiosInstance.springAxiosInst.delete(`/game-chip/delete/${id}`)
             alert('삭제 성공!')

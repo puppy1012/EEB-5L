@@ -80,6 +80,9 @@ public class GameChipController {
             throw new RuntimeException("Invalid or expired token");
         }
 
+        log.info("Deleting GameChip id: {}", gameChipId);
+        log.info("Account id from token: {}", accountId);
+
         gameChipService.deleteGameChip(gameChipId, accountId);
     }
 

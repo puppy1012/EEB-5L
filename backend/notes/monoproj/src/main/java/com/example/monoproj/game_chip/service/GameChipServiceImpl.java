@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -93,6 +94,7 @@ public class GameChipServiceImpl implements GameChipService {
     }
 
     @Override
+    @Transactional
     public void deleteGameChip(Long gameChipId, Long accountId) {
         GameChip chip = gameChipRepository.findById(gameChipId)
                 .orElseThrow(() -> new RuntimeException("GameChip not found"));
@@ -101,6 +103,7 @@ public class GameChipServiceImpl implements GameChipService {
             throw new RuntimeException("삭제 권한이 없습니다.");
         }
 
+        gameChipImageRepository.deleteAllByGameChip(chip);
         gameChipRepository.delete(chip);
     }
 
