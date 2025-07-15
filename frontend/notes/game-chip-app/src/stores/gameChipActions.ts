@@ -68,46 +68,42 @@ export const gameChipActions = {
     async requestUpdateGameChipToSpring(payload: {
         id: number
         title: string
-        description: string
+        content: string
         price: number
         thumbnailFile: File | null
         imageFileList: File[]
+        removeDetailImageIndexes: number[]
     }): Promise<void> {
         try {
-            const token = localStorage.getItem('userToken') || ''
-            if (!token) {
-                alert('로그인이 필요합니다.')
-                return
-            }
-
             const formData = new FormData()
             formData.append('title', payload.title)
-            formData.append('description', payload.description)
+            formData.append('description', payload.content)
             formData.append('price', payload.price.toString())
 
             if (payload.thumbnailFile) {
-                formData.append('thumbnailFile', payload.thumbnailFile)
+                formData.append('thumbnailFile', payload.thumbnailFile);
             }
 
             for (const file of payload.imageFileList) {
-                formData.append('imageFileList', file)
+                formData.append('imageFileList', file);
             }
 
-            await axiosInstance.springAxiosInst.put(
-                `/game-chip/update/${payload.id}`,
-                formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            )
+            for (const index of payload.removeDetailImageIndexes) {
+                formData.append('removeDetailImageIndexes', index.toString());
+            }
 
+            for (const [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    console.log(`${key}: [File name: ${value.name}, size: ${value.size}]`)
+                } else {
+                    console.log(`${key}: ${value}`)
+                }
+            }
+
+            await axiosInstance.springAxiosInst.put(`/game-chip/update/${payload.id}`, formData)
             alert('수정 성공!')
         } catch (error) {
-            alert('수정 중 오류 발생')
-            console.error('requestUpdateGameChipToSpring() 문제 발생', error)
+            alert('게임칩 수정 중 오류 발생')
             throw error
         }
     }

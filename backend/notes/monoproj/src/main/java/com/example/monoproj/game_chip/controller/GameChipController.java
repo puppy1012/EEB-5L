@@ -2,15 +2,20 @@ package com.example.monoproj.game_chip.controller;
 
 import com.example.monoproj.game_chip.controller.request_form.ListGameChipRequestForm;
 import com.example.monoproj.game_chip.controller.request_form.RegisterGameChipRequestForm;
+import com.example.monoproj.game_chip.controller.request_form.UpdateGameChipRequestForm;
 import com.example.monoproj.game_chip.controller.response_form.ListGameChipResponseForm;
 import com.example.monoproj.game_chip.controller.response_form.ReadGameChipResponseForm;
 import com.example.monoproj.game_chip.controller.response_form.RegisterGameChipResponseForm;
+import com.example.monoproj.game_chip.controller.response_form.UpdateGameChipResponseForm;
 import com.example.monoproj.game_chip.service.GameChipService;
 import com.example.monoproj.game_chip.service.request.RegisterGameChipImageRequest;
 import com.example.monoproj.game_chip.service.request.RegisterGameChipRequest;
+import com.example.monoproj.game_chip.service.request.UpdateGameChipImageRequest;
+import com.example.monoproj.game_chip.service.request.UpdateGameChipRequest;
 import com.example.monoproj.game_chip.service.response.ListGameChipResponse;
 import com.example.monoproj.game_chip.service.response.ReadGameChipResponse;
 import com.example.monoproj.game_chip.service.response.RegisterGameChipResponse;
+import com.example.monoproj.game_chip.service.response.UpdateGameChipResponse;
 import com.example.monoproj.redis_cache.service.RedisCacheService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +89,32 @@ public class GameChipController {
         log.info("Account id from token: {}", accountId);
 
         gameChipService.deleteGameChip(gameChipId, accountId);
+    }
+
+    @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public UpdateGameChipResponseForm update(
+            @RequestHeader("Authorization") String authorization,
+            @PathVariable("id") Long gameChipId,
+            @ModelAttribute UpdateGameChipRequestForm requestForm
+    ) throws IOException {
+
+        log.info("Update Request: {}", requestForm);
+
+        String token = extractToken(authorization);
+        Long accountId = redisCacheService.getValueByKey(token, Long.class);
+        if (accountId == null) {
+            throw new RuntimeException("Invalid or expired token");
+        }
+
+        UpdateGameChipRequest gameChipRequest = requestForm.toUpdateGameChipRequest(accountId);
+        UpdateGameChipImageRequest gameChipImageRequest = requestForm.toUpdateGameChipImageRequest();
+
+        UpdateGameChipResponse response = gameChipService.updateGameChip(
+                gameChipId,
+                gameChipRequest,
+                gameChipImageRequest
+        );
+        return UpdateGameChipResponseForm.from(response);
     }
 
     private String extractToken(String authorizationHeader) {
