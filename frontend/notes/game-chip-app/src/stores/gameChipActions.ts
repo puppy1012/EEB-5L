@@ -7,6 +7,8 @@ export const gameChipActions = {
                 params: { page, perPage }
             })
             this.gameChipList = res.data.gameChipList
+            this.totalItems = res.data.totalItems
+            this.totalPages = res.data.totalPages
             console.log('res.data.gameChipList:', res.data.gameChipList)
         } catch (error) {
             console.error('requestGameChipListToSpring():', error)
@@ -14,15 +16,15 @@ export const gameChipActions = {
         }
     },
 
-    // async requestGameChipToSpring(id: number): Promise<void> {
-    //     try {
-    //         const res = await axiosInstance.springAxiosInst.get(`/game-chip/read/${id}`)
-    //         this.gameChip = res.data
-    //     } catch (error) {
-    //         alert('requestGameChipToSpring() 문제 발생!')
-    //         throw error
-    //     }
-    // },
+    async requestGameChipToSpring(id: number): Promise<void> {
+        try {
+            const res = await axiosInstance.springAxiosInst.get(`/game-chip/read/${id}`)
+            this.gameChip = res.data
+        } catch (error) {
+            alert('requestGameChipToSpring() 문제 발생!')
+            throw error
+        }
+    },
 
     async requestCreateGameChipToSpring(payload: FormData): Promise<any> {
         try {
@@ -51,16 +53,16 @@ export const gameChipActions = {
         }
     },
 
-    // async requestDeleteGameChipToSpring(boardId: number): Promise<void> {
-    //     try {
-    //         await axiosInstance.springAxiosInst.delete(`/game-chip/delete/${boardId}`)
-    //         alert('삭제 성공!')
-    //     } catch (error) {
-    //         alert('requestDeleteBoardToSpring() 문제 발생')
-    //         throw error
-    //     }
-    // },
-    //
+    async requestDeleteGameChipToSpring(id: number): Promise<void> {
+        try {
+            await axiosInstance.springAxiosInst.delete(`/game-chip/delete/${id}`)
+            alert('삭제 성공!')
+        } catch (error) {
+            alert('requestDeleteGameChipToSpring() 문제 발생')
+            throw error
+        }
+    },
+
     // async requestUpdateGameChipToSpring(payload: {
     //     boardId: number
     //     title: string

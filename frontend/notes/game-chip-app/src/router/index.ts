@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 import GameChipList from "../pages/list/GameChipList.vue";
 import GameChipRegister from "../pages/register/GameChipRegister.vue";
+import GameChipRead from "../pages/read/GameChipRead.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -18,12 +19,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'GameChipRegister',
         component: GameChipRegister,
     },
-    // {
-    //     path: '/read/:boardId',
-    //     name: 'VueBoardRead',
-    //     components: { default: VueBoardRead },
-    //     props: { default: true },
-    // },
+    {
+        path: '/read/:id',
+        name: 'GameChipRead',
+        components: { default: GameChipRead },
+        props: { default: true },
+    },
     // {
     //     path: '/update/:boardId',
     //     name: 'VueBoardUpdate',

@@ -18,4 +18,6 @@ export interface GameChipState {
 export const gameChipState = () => ({
     gameChipList: [],
     gameChip: null,
+    totalItems: 0,
+    totalPages: 1,
 })

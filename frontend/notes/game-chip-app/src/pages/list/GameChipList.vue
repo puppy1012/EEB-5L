@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid class="pa-4">
     <v-row class="mb-4" align="center" justify="space-between">
       <v-col cols="auto">
         <h2>🎮 게임칩 목록</h2>
@@ -71,7 +71,8 @@ const router = useRouter()
 
 const page = ref(1)
 const perPage = 8  // 2행 x 4열 = 8개씩 보여줌
-const totalPages = ref(1)
+// const totalPages = ref(1)
+const totalPages = computed(() => gameChipStore.totalPages)
 const loading = ref(false)
 
 // 호버 상태
@@ -82,11 +83,21 @@ const registerBtnStyle = computed(() => ({
   transition: 'background-color 0.3s ease',
 }))
 
+// const fetchGameChips = async () => {
+//   loading.value = true
+//   try {
+//     await gameChipStore.requestGameChipListToSpring(page.value, perPage)
+//     totalPages.value = Math.ceil(gameChipStore.totalItems / perPage)
+//   } catch (error) {
+//     console.error('게임칩 목록 불러오기 실패:', error)
+//   } finally {
+//     loading.value = false
+//   }
+// }
 const fetchGameChips = async () => {
   loading.value = true
   try {
     await gameChipStore.requestGameChipListToSpring(page.value, perPage)
-    totalPages.value = Math.ceil(gameChipStore.totalItems / perPage)
   } catch (error) {
     console.error('게임칩 목록 불러오기 실패:', error)
   } finally {
@@ -102,7 +113,7 @@ const pagedGameChipList = computed(() => {
 
 const goToDetail = (id: number) => {
   router.push({
-    name: 'VueGameChipRead',
+    name: 'GameChipRead',
     params: { id: id.toString() }
   })
 }

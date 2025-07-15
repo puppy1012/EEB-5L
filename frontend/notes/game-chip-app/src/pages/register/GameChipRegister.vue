@@ -1,5 +1,9 @@
 <template>
-  <v-container>
+  <v-container
+      fluid
+      class="pa-4"
+      style="height: calc(100vh - 64px); overflow-y: auto;"
+  >
     <v-row>
       <v-col cols="12">
         <h2>🎮 게임칩 등록</h2>
@@ -286,9 +290,10 @@ const onSubmit = async () => {
   console.log('📦 [submit] FormData 최종 준비 완료')
 
   try {
-    await gameChipStore.requestCreateGameChipToSpring(formData)
-    alert('등록 완료!')
-    router.push({ name: 'GameChipList' })
+    const response = await gameChipStore.requestCreateGameChipToSpring(formData)
+    console.log('response:', response)
+
+    router.push({ name: 'GameChipRead', params: { id: response.id } })
   } catch (error) {
     alert('등록 실패!')
     console.error('❌ 등록 실패:', error)
