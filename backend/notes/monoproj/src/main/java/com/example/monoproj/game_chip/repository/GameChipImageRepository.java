@@ -12,4 +12,8 @@ public interface GameChipImageRepository extends JpaRepository<GameChipImage, Lo
     List<GameChipImage> findAllByGameChipId(Long gameChipId);
 
     void deleteAllByGameChip(GameChip gameChip);
+
+    void deleteByGameChipAndType(GameChip existingGameChip, GameChipImageType gameChipImageType);
+
+    List<GameChipImage> findByGameChipAndTypeOrderByIdAsc(GameChip existingGameChip, GameChipImageType gameChipImageType);
 }

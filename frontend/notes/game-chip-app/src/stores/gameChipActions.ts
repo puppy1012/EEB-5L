@@ -81,15 +81,23 @@ export const gameChipActions = {
             formData.append('price', payload.price.toString())
 
             if (payload.thumbnailFile) {
-                formData.append('thumbnail', payload.thumbnailFile)
+                formData.append('thumbnailFile', payload.thumbnailFile);
             }
 
             for (const file of payload.imageFileList) {
-                formData.append('images', file)
+                formData.append('imageFileList', file);
             }
 
             for (const index of payload.removeDetailImageIndexes) {
-                formData.append('removeIndexes', index.toString())
+                formData.append('removeDetailImageIndexes', index.toString());
+            }
+
+            for (const [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    console.log(`${key}: [File name: ${value.name}, size: ${value.size}]`)
+                } else {
+                    console.log(`${key}: ${value}`)
+                }
             }
 
             await axiosInstance.springAxiosInst.put(`/game-chip/update/${payload.id}`, formData)
