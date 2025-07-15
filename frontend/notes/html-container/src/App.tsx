@@ -15,6 +15,7 @@ const NavigationBarApp = lazy(() => import("navigationBarApp/App"));
 // const ReactTestApp = lazy(() => import("reactTestApp/App"));
 // const RecoilBoardApp = lazy(() => import("recoilBoardApp/App"))
 const AuthenticationApp = lazy(() => import("authenticationApp/App"));
+const CartApp = lazy(() => import("cartApp/App"));
 
 // import VuetifyTailwindBoardAppWrapper from "./VuetifyTailwindBoardAppWrapper";
 import VueBoardAppWrapper from "./VueBoardWrapper.tsx";
@@ -52,6 +53,7 @@ const App = () => {
                     <Route path="/authentication/*" element={<AuthenticationApp />} />
                     {/*<Route path="/vtest/*" element={<VTestWrapper eventBus={eventBus}/>} />*/}
                     <Route path="/game-chip/*" element={<VueGameChipWrapper eventBus={eventBus}/>} />
+                    <Route path="/cart/*" element={<CartApp />} />
                 </Routes>
             </Suspense>
         </BrowserRouter>

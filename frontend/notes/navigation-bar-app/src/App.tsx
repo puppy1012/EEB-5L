@@ -7,8 +7,8 @@ import ForumIcon from "@mui/icons-material/Forum";
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CasinoOutlined from '@mui/icons-material/CasinoOutlined'
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import axiosInstance from "./utility/AxiosInst.ts";
-import {CasinoOutlined} from "@mui/icons-material";
 
 const App: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -84,6 +84,14 @@ const App: React.FC = () => {
                     startIcon={<CasinoOutlined />}  // 아이콘은 예시로 사용됨
                 >
                     게임칩
+                </Button>
+                <Button
+                    color="inherit"
+                    component={Link}
+                    to="/cart/list"
+                    startIcon={<ShoppingCartCheckoutIcon />}
+                >
+                    카트
                 </Button>
                 <Button
                     color="inherit"

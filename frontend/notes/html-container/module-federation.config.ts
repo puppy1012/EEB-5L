@@ -14,6 +14,7 @@ export const mfConfig = {
     authenticationApp: "authenticationApp@http://localhost:4001/remoteEntry.js",
     // vtestApp: `vtestApp@${process.env.VTEST_APP}/remoteEntry.js`,
     gameChipApp: `gameChipApp@${process.env.VUE_GAME_CHIP_APP}/remoteEntry.js`,
+    cartApp: "cartApp@http://localhost:4322/remoteEntry.js",
   },
   shared: {
     react: { singleton: true, requiredVersion: "^18.2.0" },
