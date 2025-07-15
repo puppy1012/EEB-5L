@@ -1,8 +1,13 @@
 package com.example.monoproj.game_chip.service.response;
 
 import com.example.monoproj.game_chip.entity.GameChip;
+import com.example.monoproj.game_chip.entity.GameChipImage;
+import com.example.monoproj.game_chip.entity.GameChipImageType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor
@@ -11,15 +16,29 @@ public class RegisterGameChipResponse {
     final private String title;
     final private String description;
     final private int price;
-    final private String imageUrl;
 
-    public static RegisterGameChipResponse from(GameChip gameChip) {
+    private final byte[] thumbnailImageData;
+    private final List<byte[]> detailImageDataList;
+
+    public static RegisterGameChipResponse from(GameChip gameChip, List<GameChipImage> imageList) {
+        byte[] thumbnailImageData = imageList.stream()
+                .filter(img -> img.getType() == GameChipImageType.THUMBNAIL)
+                .map(GameChipImage::getImageData)
+                .findFirst()
+                .orElse(null);
+
+        List<byte[]> detailImageDataList = imageList.stream()
+                .filter(img -> img.getType() == GameChipImageType.DETAIL)
+                .map(GameChipImage::getImageData)
+                .collect(Collectors.toList());
+
         return new RegisterGameChipResponse(
                 gameChip.getId(),
                 gameChip.getTitle(),
                 gameChip.getDescription(),
                 gameChip.getPrice(),
-                gameChip.getImageUrl()
+                thumbnailImageData,
+                detailImageDataList
         );
     }
 }

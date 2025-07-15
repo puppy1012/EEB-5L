@@ -3,38 +3,87 @@ package com.example.monoproj.game_chip.controller;
 import com.example.monoproj.game_chip.controller.request_form.ListGameChipRequestForm;
 import com.example.monoproj.game_chip.controller.request_form.RegisterGameChipRequestForm;
 import com.example.monoproj.game_chip.controller.response_form.ListGameChipResponseForm;
+import com.example.monoproj.game_chip.controller.response_form.ReadGameChipResponseForm;
 import com.example.monoproj.game_chip.controller.response_form.RegisterGameChipResponseForm;
 import com.example.monoproj.game_chip.service.GameChipService;
+import com.example.monoproj.game_chip.service.request.RegisterGameChipImageRequest;
+import com.example.monoproj.game_chip.service.request.RegisterGameChipRequest;
 import com.example.monoproj.game_chip.service.response.ListGameChipResponse;
+import com.example.monoproj.game_chip.service.response.ReadGameChipResponse;
 import com.example.monoproj.game_chip.service.response.RegisterGameChipResponse;
 import com.example.monoproj.redis_cache.service.RedisCacheService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/game-chip")
 public class GameChipController {
 
-    private final GameChipService gameChipService;
+    final private GameChipService gameChipService;
     final private RedisCacheService redisCacheService;
 
-    @PostMapping
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RegisterGameChipResponseForm create(
             @RequestHeader("Authorization") String authorization,
-            @RequestBody RegisterGameChipRequestForm requestForm) {
+            @ModelAttribute RegisterGameChipRequestForm requestForm) throws IOException {
 
-        String token = extractToken(authorization); // Bearer 제거 등 가공
+        String token = extractToken(authorization);
         Long accountId = redisCacheService.getValueByKey(token, Long.class);
+        if (accountId == null) {
+            throw new RuntimeException("Invalid or expired token");
+        }
 
-        RegisterGameChipResponse response = gameChipService.createGameChip(requestForm.toRegisterGameChipRequest(accountId));
+        log.info("요청 폼 내용 - title: {}, description: {}, price: {}, thumbnailFile: {}, imageFileList size: {}",
+                requestForm.getTitle(),
+                requestForm.getDescription(),
+                requestForm.getPrice(),
+                requestForm.getThumbnailFile() != null ? requestForm.getThumbnailFile().getOriginalFilename() : "null",
+                requestForm.getImageFileList() != null ? requestForm.getImageFileList().size() : 0);
+
+        if (requestForm.getImageFileList() != null) {
+            requestForm.getImageFileList().forEach(file -> {
+                log.info("추가 이미지 파일 이름: {}", file.getOriginalFilename());
+            });
+        }
+
+        RegisterGameChipRequest gameChipRequest = requestForm.toRegisterGameChipRequest(accountId);
+        RegisterGameChipImageRequest gameChipImageRequest = requestForm.toRegisterGameChipImageRequest();
+        RegisterGameChipResponse response = gameChipService.createGameChip(gameChipRequest, gameChipImageRequest);
         return RegisterGameChipResponseForm.from(response);
     }
 
-    @GetMapping
+    @GetMapping("/list")
     public ListGameChipResponseForm list(@ModelAttribute ListGameChipRequestForm requestForm) {
         ListGameChipResponse response = gameChipService.getAllGameChips(requestForm.toListGameChipRequest());
         return ListGameChipResponseForm.from(response);
+    }
+
+    @GetMapping("/read/{id}")
+    public ReadGameChipResponseForm read(@PathVariable("id") Long gameChipId) {
+        ReadGameChipResponse response = gameChipService.readGameChip(gameChipId);
+        return ReadGameChipResponseForm.from(response);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public void delete(@RequestHeader("Authorization") String authorization,
+                       @PathVariable("id") Long gameChipId) {
+
+        String token = extractToken(authorization);
+        Long accountId = redisCacheService.getValueByKey(token, Long.class);
+        if (accountId == null) {
+            throw new RuntimeException("Invalid or expired token");
+        }
+
+        log.info("Deleting GameChip id: {}", gameChipId);
+        log.info("Account id from token: {}", accountId);
+
+        gameChipService.deleteGameChip(gameChipId, accountId);
     }
 
     private String extractToken(String authorizationHeader) {

@@ -13,6 +13,7 @@ export const mfConfig = {
     diceGameApp: "diceGameApp@http://localhost:4000/remoteEntry.js",
     authenticationApp: "authenticationApp@http://localhost:4001/remoteEntry.js",
     // vtestApp: `vtestApp@${process.env.VTEST_APP}/remoteEntry.js`,
+    gameChipApp: `gameChipApp@${process.env.VUE_GAME_CHIP_APP}/remoteEntry.js`,
   },
   shared: {
     react: { singleton: true, requiredVersion: "^18.2.0" },

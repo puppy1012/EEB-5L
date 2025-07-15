@@ -6,7 +6,8 @@
     "navigation-bar-app",
     "vue-board-app",
     "dice-game-app",
-    "authentication-app"
+    "authentication-app",
+    "game-chip-app"
   ],
   "scripts": {
     "start": "lerna run start --parallel"

@@ -13,8 +13,8 @@ const VueBoardAppWrapper = ({ eventBus }) => {
 
         if (!isMountedRef.current) {
             const loadRemoteComponent = async () => {
-                const { vueBoardAppMount  } = await import("vueBoardApp/bootstrap");
-                vueBoardAppMount(vueModuleRef.current, eventBus);
+                const { vueGameChipAppMount  } = await import("gameChipApp/bootstrap");
+                vueGameChipAppMount(vueModuleRef.current, eventBus);
                 isMountedRef.current = true;
             }
 
@@ -28,12 +28,12 @@ const VueBoardAppWrapper = ({ eventBus }) => {
     }, [])
 
     useEffect(() => {
-        console.log('Vuetify Board 라우터 위치 바꿨어: ' + location.pathname)
+        console.log('Vue Game Chip 라우터 위치 바꿨어: ' + location.pathname)
         const handleNavigation = () => {
             console.log('handleNavigation()')
-            if (location.pathname === "/vue-board/list") {
+            if (location.pathname === "/game-chip/list") {
                 console.log('라우터 변경')
-                eventBus.emit('vue-board-routing-event', '/')
+                eventBus.emit('game-chip-routing-event', '/')
             }
         };
 
