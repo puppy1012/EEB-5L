@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BoardControllerTests {
@@ -173,17 +173,37 @@ class BoardControllerTests {
 
     @Test
     void 게시글_삭제_성공() {
-        // given
         Long boardId = 1L;
         String token = "Bearer mockToken123";
         Long accountId = 100L;
 
         when(redisCacheService.getValueByKey("mockToken123", Long.class)).thenReturn(accountId);
 
-        // when
+        doNothing().when(boardService).delete(boardId, accountId);
+
         boardController.deleteBoard(boardId, token);
 
-        // then
+        verify(redisCacheService).getValueByKey("mockToken123", Long.class);
+        verify(boardService).delete(boardId, accountId);
+    }
+
+    @Test
+    void 게시글_삭제_존재하지않음_예외() {
+        Long boardId = 999L;
+        String token = "Bearer mockToken123";
+        Long accountId = 100L;
+
+        when(redisCacheService.getValueByKey("mockToken123", Long.class)).thenReturn(accountId);
+
+        doThrow(new RuntimeException("게시글이 존재하지 않습니다."))
+                .when(boardService).delete(boardId, accountId);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            boardController.deleteBoard(boardId, token);
+        });
+
+        assertEquals("게시글이 존재하지 않습니다.", exception.getMessage());
+
         verify(redisCacheService).getValueByKey("mockToken123", Long.class);
         verify(boardService).delete(boardId, accountId);
     }
