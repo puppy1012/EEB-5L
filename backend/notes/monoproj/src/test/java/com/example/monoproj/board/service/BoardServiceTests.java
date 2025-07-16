@@ -10,6 +10,7 @@ import com.example.monoproj.board.service.request.CreateBoardRequest;
 import com.example.monoproj.board.service.response.CreateBoardResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -79,6 +80,12 @@ public class BoardServiceTests {
         assertEquals(board.getTitle(), response.getTitle());
         assertEquals(board.getContent(), response.getContent());
 
-        verify(boardRepository).save(any(Board.class));
+        ArgumentCaptor<Board> boardCaptor = ArgumentCaptor.forClass(Board.class);
+        verify(boardRepository).save(boardCaptor.capture());
+
+        Board savedBoard = boardCaptor.getValue();
+        assertEquals(request.getTitle(), savedBoard.getTitle());
+        assertEquals(request.getContent(), savedBoard.getContent());
+        assertEquals(accountProfile, savedBoard.getWriter());
     }
 }
