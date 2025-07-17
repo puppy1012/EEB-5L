@@ -1,5 +1,6 @@
 package com.example.monoproj.game_chip.entity;
 
+import com.example.monoproj.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 public class GameChip {
 
@@ -21,9 +21,14 @@ public class GameChip {
 
     private String title;
 
+    @Lob
+    private String description;
+
     private int price;
 
-    private String imageUrl; // AWS S3에 업로드된 이미지 경로
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -32,10 +37,22 @@ public class GameChip {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public GameChip(String title, int price, String imageUrl) {
+    public GameChip(String title, String description, int price, Account account) {
         this.title = title;
+        this.description = description;
         this.price = price;
-        this.imageUrl = imageUrl;
+        this.account = account;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
     }
 }
-

@@ -99,7 +99,17 @@ const SocialAuthenticationButtons: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col gap-4 w-full max-w-xs mx-auto mt-20">
+        <div
+            className="flex flex-col w-full max-w-xs mx-auto"
+            style={{
+                minHeight: `calc(100vh - 64px)`,
+                gap: '1rem',
+                justifyContent: 'center',
+                alignItems: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+            }}
+        >
             <SocialLoginButton provider="kakao" onClick={handleLogin("kakao")} />
             <SocialLoginButton provider="google" onClick={handleLogin("google")} />
             <SocialLoginButton provider="naver" onClick={handleLogin("naver")} />

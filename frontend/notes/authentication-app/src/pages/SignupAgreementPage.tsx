@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { privacyText } from "./PrivacyText";
 import { termsText } from "./TermsText";
@@ -8,18 +8,13 @@ const SignupAgreementPage: React.FC = () => {
     const location = useLocation();
     const { user, loginType, temporaryUserToken } = location.state || {};
 
-    console.log("[AgreementPage] location.state:", location.state);
-    console.log("[AgreementPage] user:", user);
-    console.log("[AgreementPage] loginType:", loginType);
-    console.log("[AgreementPage] temporaryUserToken:", temporaryUserToken);
-
     const [privacyAgreed, setPrivacyAgreed] = useState(false);
     const [termsAgreed, setTermsAgreed] = useState(false);
     const [allAgreed, setAllAgreed] = useState(false);
-
     const [showPrivacy, setShowPrivacy] = useState(true);
     const [showTerms, setShowTerms] = useState(true);
 
+    const [isHovered, setIsHovered] = useState(false);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const canProceed = privacyAgreed && termsAgreed;
 
@@ -67,13 +62,58 @@ const SignupAgreementPage: React.FC = () => {
         navigate("/");
     };
 
+    const loginButtonStyle = useMemo(() => {
+        const baseStyle = {
+            width: "100%",
+            maxWidth: "20rem",
+            margin: "1.5rem auto 0 auto",
+            padding: "0.75rem 1.5rem",
+            borderRadius: "0.375rem",
+            fontWeight: 600,
+            transition: "background-color 0.3s ease",
+            display: "block",
+            color: canProceed ? "#000" : "#888",
+            backgroundColor: "#facc15", // yellow-400
+            cursor: canProceed ? "pointer" : "not-allowed",
+        };
+
+        if (!canProceed) {
+            return {
+                ...baseStyle,
+                backgroundColor: "#e5e7eb", // gray-300
+                color: "#9ca3af", // gray-500
+            };
+        }
+
+        if (isHovered) {
+            return {
+                ...baseStyle,
+                backgroundColor: "#fbbf24", // yellow-500
+            };
+        }
+
+        return baseStyle;
+    }, [canProceed, isHovered]);
+
     if (!user || !loginType || !temporaryUserToken) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen">
-                <p className="text-lg font-semibold">잘못된 접근입니다.</p>
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                minHeight: "100vh",
+                justifyContent: "center",
+                alignItems: "center"
+            }}>
+                <p style={{ fontSize: "1.125rem", fontWeight: 600 }}>잘못된 접근입니다.</p>
                 <button
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-                    onClick={() => navigate("/")}
+                    style={{
+                        marginTop: "1rem",
+                        padding: "0.5rem 1rem",
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        borderRadius: "0.375rem",
+                    }}
+                    onClick={goBack}
                 >
                     홈으로 돌아가기
                 </button>
@@ -82,12 +122,20 @@ const SignupAgreementPage: React.FC = () => {
     }
 
     return (
-        <div className="max-w-3xl w-[90%] mx-auto mt-10 p-6 rounded-xl border border-gray-200 bg-white">
-            <h2 className="text-2xl font-bold mb-6">약관 동의</h2>
+        <div style={{
+            maxWidth: "48rem",
+            width: "90%",
+            margin: "2.5rem auto 0 auto",
+            padding: "1.5rem",
+            borderRadius: "0.75rem",
+            border: "1px solid #e5e7eb",
+            backgroundColor: "white"
+        }}>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem" }}>약관 동의</h2>
 
             {/* 전체 약관 동의 */}
-            <section className="mb-8">
-                <label className="font-bold text-base flex items-center gap-2">
+            <section style={{ marginBottom: "2rem" }}>
+                <label style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "0.5rem" }}>
                     <input
                         type="checkbox"
                         checked={allAgreed}
@@ -98,8 +146,8 @@ const SignupAgreementPage: React.FC = () => {
             </section>
 
             {/* 개인정보 처리방침 */}
-            <section className="mb-8">
-                <label className="font-medium text-base flex items-center gap-2">
+            <section style={{ marginBottom: "2rem" }}>
+                <label style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "0.5rem" }}>
                     <input
                         type="checkbox"
                         checked={privacyAgreed}
@@ -113,14 +161,33 @@ const SignupAgreementPage: React.FC = () => {
 
                 {showPrivacy && (
                     <div
-                        className="text-sm text-gray-700 leading-relaxed whitespace-pre-line mt-2 p-4 border border-gray-300 rounded-md bg-gray-50 max-h-64 overflow-y-auto"
+                        style={{
+                            fontSize: "0.875rem",
+                            color: "#374151",
+                            marginTop: "0.5rem",
+                            padding: "1rem",
+                            border: "1px solid #d1d5db",
+                            borderRadius: "0.375rem",
+                            backgroundColor: "#f9fafb",
+                            maxHeight: "16rem",
+                            overflowY: "auto",
+                            whiteSpace: "pre-line"
+                        }}
                         dangerouslySetInnerHTML={{ __html: privacyText }}
                     />
                 )}
 
-                <div className="mt-2 text-left">
+                <div style={{ marginTop: "0.5rem", textAlign: "left" }}>
                     <button
-                        className="text-sm text-blue-600 hover:underline"
+                        style={{
+                            fontSize: "0.875rem",
+                            color: "#2563eb",
+                            textDecoration: "underline",
+                            background: "none",
+                            border: "none",
+                            padding: 0,
+                            cursor: "pointer"
+                        }}
                         onClick={() => toggleView("privacy")}
                     >
                         {showPrivacy ? "내용 접기" : "자세히 보기"}
@@ -128,11 +195,11 @@ const SignupAgreementPage: React.FC = () => {
                 </div>
             </section>
 
-            <hr className="border-gray-300 my-6" />
+            <hr style={{ borderColor: "#d1d5db", margin: "1.5rem 0" }} />
 
             {/* 이용약관 */}
-            <section className="mb-8">
-                <label className="font-medium text-base flex items-center gap-2">
+            <section style={{ marginBottom: "2rem" }}>
+                <label style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "0.5rem" }}>
                     <input
                         type="checkbox"
                         checked={termsAgreed}
@@ -146,14 +213,33 @@ const SignupAgreementPage: React.FC = () => {
 
                 {showTerms && (
                     <div
-                        className="text-sm text-gray-700 leading-relaxed whitespace-pre-line mt-2 p-4 border border-gray-300 rounded-md bg-gray-50 max-h-64 overflow-y-auto"
+                        style={{
+                            fontSize: "0.875rem",
+                            color: "#374151",
+                            marginTop: "0.5rem",
+                            padding: "1rem",
+                            border: "1px solid #d1d5db",
+                            borderRadius: "0.375rem",
+                            backgroundColor: "#f9fafb",
+                            maxHeight: "16rem",
+                            overflowY: "auto",
+                            whiteSpace: "pre-line"
+                        }}
                         dangerouslySetInnerHTML={{ __html: termsText }}
                     />
                 )}
 
-                <div className="mt-2 text-left">
+                <div style={{ marginTop: "0.5rem", textAlign: "left" }}>
                     <button
-                        className="text-sm text-blue-600 hover:underline"
+                        style={{
+                            fontSize: "0.875rem",
+                            color: "#2563eb",
+                            textDecoration: "underline",
+                            background: "none",
+                            border: "none",
+                            padding: 0,
+                            cursor: "pointer"
+                        }}
                         onClick={() => toggleView("terms")}
                     >
                         {showTerms ? "내용 접기" : "자세히 보기"}
@@ -161,23 +247,28 @@ const SignupAgreementPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* 간편 로그인 버튼 */}
+            {/* 버튼 */}
             <button
                 ref={buttonRef}
                 onClick={goToLogin}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 disabled={!canProceed}
-                className={`w-full max-w-sm mx-auto block mt-6 px-6 py-3 text-white font-semibold rounded-md transition ${
-                    canProceed
-                        ? "bg-yellow-400 hover:bg-yellow-500"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
+                style={loginButtonStyle}
             >
                 간편 로그인으로 계속하기
             </button>
 
             <p
                 onClick={goBack}
-                className="mt-4 text-sm text-center text-gray-600 underline cursor-pointer"
+                style={{
+                    marginTop: "1rem",
+                    fontSize: "0.875rem",
+                    textAlign: "center",
+                    color: "#4b5563",
+                    textDecoration: "underline",
+                    cursor: "pointer"
+                }}
             >
                 돌아가기
             </p>

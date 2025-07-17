@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../utility/AxiosInst.ts";
 
@@ -9,10 +9,22 @@ const SignupSummaryPage: React.FC = () => {
 
     if (!user || !loginType || !temporaryUserToken) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen">
-                <p className="text-lg font-semibold">잘못된 접근입니다.</p>
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "100vh",
+            }}>
+                <p style={{ fontSize: "1.125rem", fontWeight: 600 }}>잘못된 접근입니다.</p>
                 <button
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+                    style={{
+                        marginTop: "1rem",
+                        padding: "0.5rem 1rem",
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        borderRadius: "0.375rem",
+                    }}
                     onClick={() => navigate("/")}
                 >
                     홈으로 돌아가기
@@ -24,6 +36,7 @@ const SignupSummaryPage: React.FC = () => {
     const [nickname, setNickname] = useState(user.nickname || user.name || "");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
 
     const handleSignup = async () => {
         setError(null);
@@ -43,12 +56,7 @@ const SignupSummaryPage: React.FC = () => {
                 temporaryUserToken,
             });
 
-            const createdUserToken = response.data
-
-            console.log("response:", response)
-            console.log("userToken:", createdUserToken);
-            console.log("user.email:", user.email);
-            console.log("nickname.trim():", nickname.trim());
+            const createdUserToken = response.data;
 
             localStorage.setItem("userToken", createdUserToken);
             localStorage.setItem("userEmail", user.email);
@@ -66,38 +74,93 @@ const SignupSummaryPage: React.FC = () => {
         }
     };
 
-    return (
-        <div className="max-w-xl mx-auto mt-20 p-6 border rounded-xl bg-white shadow">
-            <h1 className="text-2xl font-bold mb-6">회원 정보 확인 및 신청</h1>
+    const buttonStyle = useMemo(() => {
+        const base = {
+            width: "100%",
+            padding: "0.75rem",
+            fontWeight: 600,
+            borderRadius: "0.375rem",
+            color: "white",
+            transition: "background-color 0.3s ease",
+            border: "none",
+            cursor: loading ? "not-allowed" : "pointer",
+            backgroundColor: "#facc15", // 기본색 (yellow-400)
+        };
 
-            <div className="mb-4">
-                <p className="text-gray-700 font-medium">이메일 주소</p>
-                <p className="text-lg">{user.email || "알 수 없음"}</p>
+        if (loading) {
+            return {
+                ...base,
+                backgroundColor: "#d1d5db", // gray-300
+                color: "#9ca3af", // gray-500
+            };
+        }
+
+        if (isHovered) {
+            return {
+                ...base,
+                backgroundColor: "#fbbf24", // yellow-500
+            };
+        }
+
+        return base;
+    }, [loading, isHovered]);
+
+    return (
+        <div style={{
+            maxWidth: "36rem",
+            margin: "5rem auto 0 auto",
+            padding: "1.5rem",
+            border: "1px solid #e5e7eb",
+            borderRadius: "0.75rem",
+            backgroundColor: "white",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.1)"
+        }}>
+            <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem" }}>
+                회원 정보 확인 및 신청
+            </h1>
+
+            <div style={{ marginBottom: "1rem" }}>
+                <p style={{ color: "#374151", fontWeight: 500 }}>이메일 주소</p>
+                <p style={{ fontSize: "1.125rem" }}>{user.email || "알 수 없음"}</p>
             </div>
 
-            <div className="mb-6">
-                <label htmlFor="nickname" className="text-gray-700 font-medium block mb-1">
+            <div style={{ marginBottom: "1.5rem" }}>
+                <label htmlFor="nickname" style={{
+                    color: "#374151",
+                    fontWeight: 500,
+                    display: "block",
+                    marginBottom: "0.25rem"
+                }}>
                     닉네임
                 </label>
                 <input
                     id="nickname"
                     type="text"
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
+                    style={{
+                        width: "100%",
+                        padding: "0.5rem",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "0.375rem",
+                        outline: "none",
+                        fontSize: "1rem",
+                    }}
                 />
             </div>
 
-            {error && <p className="mb-4 text-red-600">{error}</p>}
+            {error && (
+                <p style={{ marginBottom: "1rem", color: "#dc2626" }}>
+                    {error}
+                </p>
+            )}
 
             <button
                 onClick={handleSignup}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 disabled={loading}
-                className={`w-full py-3 text-white font-semibold rounded ${
-                    loading
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-yellow-400 hover:bg-yellow-500"
-                }`}
+                style={buttonStyle}
             >
                 {loading ? "처리 중..." : "회원 신청"}
             </button>

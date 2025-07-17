@@ -86,4 +86,17 @@ public class BoardController {
         return UpdateBoardResponseForm.from(response);
     }
 
+    @DeleteMapping("/delete/{boardId}")
+    public void deleteBoard(
+            @PathVariable("boardId") Long boardId,
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        log.info("deleteBoard(): {}", boardId);
+
+        String token = authorizationHeader.replace("Bearer ", "").trim();
+        Long accountId = redisCacheService.getValueByKey(token, Long.class);
+        log.info("accountId -> {}", accountId);
+
+        boardService.delete(boardId, accountId);
+    }
 }
